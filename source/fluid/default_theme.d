@@ -11,6 +11,7 @@ import fluid.radiobox;
 import fluid.typeface;
 import fluid.drag_slot;
 import fluid.separator;
+import fluid.code_input;
 import fluid.file_input;
 import fluid.text_input;
 import fluid.popup_frame;
@@ -94,6 +95,20 @@ static this() {
                     textColor = color("#000a"),
                     backgroundColor = color("#fff5"),
                 ),
+            ),
+            rule!CodeInput(
+                when!`a.token.startsWith("keyword")`    (textColor = color("#5f00d7")),
+                when!`a.token.startsWith("attribute")`  (textColor = color("#af0000")),
+                when!`a.token.startsWith("property")`   (textColor = color("#af0000")),
+                when!`a.token.startsWith("punctuation")`(textColor = color("#4e4e4e")),
+                when!`a.token.startsWith("type")`       (textColor = color("#005f5f")),
+                when!`a.token.startsWith("operator")`   (textColor = color("#50228a")),
+                when!`a.token.startsWith("comment")`    (textColor = color("#8a8a8a")),
+                when!`a.token.startsWith("number")`     (textColor = color("#875f00")),
+                when!`a.token.startsWith("string")`     (textColor = color("#008700")),
+                when!`a.token.startsWith("constant")`   (textColor = color("#875f00")),
+                when!`a.token.startsWith("function")`   (textColor = color("#005fd7")),
+                when!`a.token.startsWith("module")`     (textColor = color("#af8700")),
             ),
             rule!NumberInputSpinner(
                 mouseCursor = FluidMouseCursor.pointer,

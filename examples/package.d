@@ -31,7 +31,6 @@ enum sidebarSize = .sizeLimitX(220);
 
 Theme mainTheme;
 Theme exampleListTheme;
-Theme codeTheme;
 Theme previewWrapperTheme;
 Theme highlightBoxTheme;
 
@@ -59,6 +58,14 @@ static this() {
         rule!Grid(margin.sideY = 0),
         rule!GridRow(margin = 0),
         rule!ScrollFrame(margin = 0),
+        rule!CodeInput(
+            typeface = Style.loadTypeface(thisExePath.dirName.buildPath("../examples/ibm-plex-mono.ttf"), 11),
+            margin = 0,
+            backgroundColor = color!"#dedede",
+            padding.sideX = 12,
+            padding.sideY = 16,
+            when!"a.isDisabled"(backgroundColor = color!"#dedede"),
+        ),
 
         // Heading
         rule!(Label, Tags.heading)(
@@ -98,28 +105,6 @@ static this() {
         ),
     );
 
-    codeTheme = mainTheme.derive(
-
-        rule!Node(
-            typeface = Style.loadTypeface(thisExePath.dirName.buildPath("../examples/ibm-plex-mono.ttf"), 11),
-        ),
-        rule!Frame(
-            padding = 0,
-        ),
-        rule!CodeInput(
-            margin = 0,
-            backgroundColor = color!"#dedede",
-            padding.sideX = 12,
-            padding.sideY = 16,
-        ),
-        rule!Label(
-            margin = 0,
-            backgroundColor = color!"#dedede",
-            padding.sideX = 12,
-            padding.sideY = 16,
-        ),
-    );
-
     previewWrapperTheme = mainTheme.derive(
         rule!Frame(
             margin = 0,
@@ -141,7 +126,7 @@ static this() @system {
     TSQueryError error;
     uint errorOffset;
 
-    const queries = readText("external/tree-sitter-d/queries/highlights.scm");
+    const queries = dQuerySource;
 
     treeSitterD = treeSitterLanguage!"d";
     treeSitterDQuery = ts_query_new(treeSitterD, queries.ptr, cast(uint) queries.length, &errorOffset, &error);
@@ -379,13 +364,19 @@ Space exampleList(void delegate(Chapter) @safe changeChapter) @safe {
 /// Create a code block
 Space showcaseCode(string code) {
 
-    return vframe(
-        .layout!"fill",
-        .codeTheme,
-        sizeLock!label(
-            .layout!"center",
-            .contentSize,
-            code,
+    CodeInput editor;
+
+    scope (success) {
+        editor.value = code;
+        editor.disable();
+    }
+
+    return sizeLock!vframe(
+        .layout!"center",
+        .contentSize,
+        editor = codeInput(
+            .layout!"fill",
+            new TreeSitterHighlighter(treeSitterD, treeSitterDQuery),
         ),
     );
 
@@ -415,7 +406,6 @@ Space showcaseCode(string code, Node node, Theme theme = Theme.init) {
 
         editor = codeInput(
             .layout!(1, "fill"),
-            .codeTheme,
             new TreeSitterHighlighter(treeSitterD, treeSitterDQuery),
         ),
         vframe(
