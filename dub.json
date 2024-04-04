@@ -53,7 +53,9 @@
 		{
 			"dependencies": {
 				"libdparse": "~>0.23.2",
-				"fluid": { "path": "." }
+				"fluid": { "path": "." },
+				"fluid-tree-sitter": ">=0.0.0",
+				"fluid-tree-sitter:d": ">=0.0.0"
 			},
 			"name": "showcase",
 			"libs": [

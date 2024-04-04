@@ -12,6 +12,7 @@
 module fluid.showcase;
 
 import fluid;
+import fluid.tree_sitter;
 import dparse.ast;
 
 import std.string;
@@ -127,6 +128,31 @@ static this() {
             borderStyle = colorBorder(color!"#dedede"),
         ),
     );
+
+}
+
+TSLanguage* treeSitterD;
+TSQuery* treeSitterDQuery;
+
+static this() @system {
+
+    import std.file;
+
+    TSQueryError error;
+    uint errorOffset;
+
+    const queries = readText("external/tree-sitter-d/queries/highlights.scm");
+
+    treeSitterD = treeSitterLanguage!"d";
+    treeSitterDQuery = ts_query_new(treeSitterD, queries.ptr, cast(uint) queries.length, &errorOffset, &error);
+
+    assert(treeSitterDQuery);
+
+}
+
+static ~this() @system {
+
+    ts_query_delete(treeSitterDQuery);
 
 }
 
@@ -368,12 +394,12 @@ Space showcaseCode(string code) {
 /// Showcase code and its result.
 Space showcaseCode(string code, Node node, Theme theme = Theme.init) {
 
-    CodeInput editor;
-
     // Make the node inherit the default theme rather than the one we set
     if (!node.theme) {
         node.theme = either(theme, fluidDefaultTheme);
     }
+
+    CodeInput editor;
 
     // Reset code editor text.
     void reset() {
@@ -390,6 +416,7 @@ Space showcaseCode(string code, Node node, Theme theme = Theme.init) {
         editor = codeInput(
             .layout!(1, "fill"),
             .codeTheme,
+            new TreeSitterHighlighter(treeSitterD, treeSitterDQuery),
         ),
         vframe(
             .layout!(1, "fill"),
